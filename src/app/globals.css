@@ -1,0 +1,60 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Big Calendar Styles */
+.rbc-calendar {
+  @apply bg-white rounded-lg shadow-sm border;
+}
+
+.rbc-header {
+  @apply bg-gray-50 py-3 px-4 font-semibold text-gray-700;
+}
+
+.rbc-date-cell {
+  @apply p-2;
+}
+
+.rbc-today {
+  @apply bg-blue-50;
+}
+
+.rbc-event {
+  @apply rounded-md px-2 py-1 text-sm font-medium;
+}
+
+.rbc-event.assignment {
+  @apply bg-blue-500 text-white;
+}
+
+.rbc-event.exam {
+  @apply bg-red-500 text-white;
+}
+
+.rbc-event.reading {
+  @apply bg-green-500 text-white;
+}
+
+.rbc-event.other {
+  @apply bg-gray-500 text-white;
+}
+
+.rbc-toolbar {
+  @apply mb-4 flex justify-between items-center;
+}
+
+.rbc-btn-group > button {
+  @apply px-3 py-2 bg-white border border-gray-300 text-gray-700 hover:bg-gray-50;
+}
+
+.rbc-btn-group > button:first-child {
+  @apply rounded-l-md;
+}
+
+.rbc-btn-group > button:last-child {
+  @apply rounded-r-md;
+}
+
+.rbc-btn-group > button.rbc-active {
+  @apply bg-blue-500 text-white;
+}

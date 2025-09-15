@@ -1,0 +1,37 @@
+{
+    "name": "syllabus-calendar",
+    "version": "0.1.0",
+    "private": true,
+    "scripts": {
+        "dev": "next dev",
+        "build": "next build",
+        "start": "next start",
+        "lint": "next lint"
+    },
+    "dependencies": {
+        "@types/node": "^20",
+        "@types/react": "^18",
+        "@types/react-dom": "^18",
+        "autoprefixer": "^10.0.1",
+        "chrono-node": "^2.7.0",
+        "date-fns": "^2.30.0",
+        "googleapis": "^128.0.0",
+        "lucide-react": "^0.263.1",
+        "moment": "^2.29.4",
+        "next": "^14.0.0",
+        "openai": "^4.20.0",
+        "pdf-parse": "^1.1.1",
+        "postcss": "^8",
+        "react": "^18",
+        "react-big-calendar": "^1.8.2",
+        "react-dom": "^18",
+        "react-dropzone": "^14.2.3",
+        "tailwindcss": "^3.3.0",
+        "typescript": "^5"
+    },
+    "devDependencies": {
+        "@types/next": "^9.0.0",
+        "eslint": "^8",
+        "eslint-config-next": "14.0.0"
+    }
+}
