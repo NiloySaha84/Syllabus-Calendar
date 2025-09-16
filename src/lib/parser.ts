@@ -1,21 +1,15 @@
 import * as chrono from 'chrono-node'
 import { SyllabusEvent, ParseResult } from '@/types'
-import { v4 as uuidv4 } from 'uuid'
 import { format } from 'date-fns'
-
 
 export async function parseSyllabusText(text: string): Promise<ParseResult> {
   try {
-    
     const cleanText = text.replace(/\s+/g, ' ').trim()
-    
-    
     const lines = cleanText.split('\n').map(line => line.trim()).filter(line => line.length > 0)
     
     const events: SyllabusEvent[] = []
     
     for (const line of lines) {
-      
       const dateMatches = chrono.parse(line, new Date())
       
       for (const match of dateMatches) {
@@ -37,7 +31,7 @@ export async function parseSyllabusText(text: string): Promise<ParseResult> {
       }
     }
     
-    
+    // AI enhancement if OpenAI API key is available
     if (process.env.OPENAI_API_KEY && events.length > 0) {
       try {
         await enhanceEventsWithOpenAI(events, cleanText)
@@ -46,7 +40,7 @@ export async function parseSyllabusText(text: string): Promise<ParseResult> {
       }
     }
     
-    
+    // Remove duplicates and sort
     const uniqueEvents = removeDuplicates(events)
     uniqueEvents.sort((a, b) => a.date.getTime() - b.date.getTime())
     
@@ -64,16 +58,12 @@ export async function parseSyllabusText(text: string): Promise<ParseResult> {
   }
 }
 
-
- 
 function classifyEventType(text: string): 'assignment' | 'exam' | 'reading' | 'other' {
   const lowerText = text.toLowerCase()
   
- 
   if (lowerText.match(/\b(assignment|homework|hw|project|paper|essay|report|submit|due)\b/)) {
     return 'assignment'
   }
-  
   
   if (lowerText.match(/\b(exam|test|quiz|midterm|final|assessment)\b/)) {
     return 'exam'
@@ -92,15 +82,17 @@ function extractEventTitle(line: string, type: string): string {
   title = title.replace(/\b\d{1,2}-\d{1,2}-\d{2,4}\b/g, '')
   title = title.replace(/[-–—:]+/g, '').trim()
   title = title.replace(/\s+/g, ' ')
+  
   if (title.length < 5) {
-    const typeMap = {
+    const typeMap: Record<string, string> = {
       assignment: 'Assignment',
       exam: 'Exam',
       reading: 'Reading',
       other: 'Event'
     }
-    title = typeMap[type as keyof typeof typeMap] || 'Event'
+    title = typeMap[type] || 'Event'
   }
+  
   return title.charAt(0).toUpperCase() + title.slice(1)
 }
 
@@ -138,6 +130,7 @@ async function enhanceEventsWithOpenAI(events: SyllabusEvent[], fullText: string
   if (!process.env.OPENAI_API_KEY) return
   
   try {
+    // Dynamic import to avoid bundling OpenAI in client-side code
     const { OpenAI } = await import('openai')
     
     const openai = new OpenAI({
@@ -175,12 +168,18 @@ Return only valid JSON array, no other text.
     try {
       const enhancedEvents = JSON.parse(content)
       
-      for (const enhanced of enhancedEvents) {
-        const existingEvent = events.find(e => format(e.date, 'yyyy-MM-dd') === enhanced.date)
-        if (existingEvent) {
-          existingEvent.type = enhanced.type || existingEvent.type
-          existingEvent.title = enhanced.title || existingEvent.title
-          existingEvent.description = enhanced.description || existingEvent.description
+      if (Array.isArray(enhancedEvents)) {
+        for (const enhanced of enhancedEvents) {
+          const existingEvent = events.find(e => format(e.date, 'yyyy-MM-dd') === enhanced.date)
+          if (existingEvent && enhanced.type && ['assignment', 'exam', 'reading', 'other'].includes(enhanced.type)) {
+            existingEvent.type = enhanced.type
+            if (enhanced.title && enhanced.title.length > 3) {
+              existingEvent.title = enhanced.title
+            }
+            if (enhanced.description && enhanced.description.length > 5) {
+              existingEvent.description = enhanced.description
+            }
+          }
         }
       }
     } catch (parseError) {

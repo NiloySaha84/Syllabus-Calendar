@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Calendar, momentLocalizer, View } from 'react-big-calendar'
+import { Calendar, momentLocalizer, View, Event } from 'react-big-calendar'
 import moment from 'moment'
 import { SyllabusEvent } from '@/types'
 import 'react-big-calendar/lib/css/react-big-calendar.css'
@@ -13,11 +13,16 @@ interface CalendarViewProps {
   onEventEdit?: (event: SyllabusEvent) => void
 }
 
+interface CalendarEvent extends Event {
+  resource: SyllabusEvent
+  className: string
+}
+
 export default function CalendarView({ events, onEventEdit }: CalendarViewProps) {
   const [view, setView] = useState<View>('month')
 
   // Transform events for react-big-calendar
-  const calendarEvents = events.map(event => ({
+  const calendarEvents: CalendarEvent[] = events.map(event => ({
     id: event.id,
     title: event.title,
     start: event.date,
@@ -26,13 +31,13 @@ export default function CalendarView({ events, onEventEdit }: CalendarViewProps)
     className: event.type // For CSS styling
   }))
 
-  const handleSelectEvent = (event: any) => {
+  const handleSelectEvent = (event: CalendarEvent) => {
     if (onEventEdit && event.resource) {
       onEventEdit(event.resource)
     }
   }
 
-  const eventStyleGetter = (event: any) => {
+  const eventStyleGetter = (event: CalendarEvent) => {
     const colors = {
       assignment: { backgroundColor: '#3b82f6', color: 'white' },
       exam: { backgroundColor: '#ef4444', color: 'white' },

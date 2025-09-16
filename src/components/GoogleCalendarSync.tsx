@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Calendar as CalendarIcon, Loader2, CheckCircle, AlertCircle } from 'lucide-react'
 import { SyllabusEvent } from '@/types'
 import React from 'react'
@@ -9,14 +9,16 @@ interface GoogleCalendarSyncProps {
   events: SyllabusEvent[]
 }
 
+interface SyncStatus {
+  success: boolean
+  message: string
+  results?: any[]
+}
+
 export default function GoogleCalendarSync({ events }: GoogleCalendarSyncProps) {
   const [isAuthorizing, setIsAuthorizing] = useState(false)
   const [isSyncing, setIsSyncing] = useState(false)
-  const [syncStatus, setSyncStatus] = useState<{
-    success: boolean
-    message: string
-    results?: any[]
-  } | null>(null)
+  const [syncStatus, setSyncStatus] = useState<SyncStatus | null>(null)
 
   const handleGoogleAuth = () => {
     setIsAuthorizing(true)
@@ -45,10 +47,11 @@ export default function GoogleCalendarSync({ events }: GoogleCalendarSyncProps) 
       `prompt=consent`
 
     // Store events in sessionStorage for after auth
-    sessionStorage.setItem('pendingEvents', JSON.stringify(events))
-    
-    // Redirect to Google OAuth
-    window.location.href = authUrl
+    if (typeof window !== 'undefined') {
+      sessionStorage.setItem('pendingEvents', JSON.stringify(events))
+      // Redirect to Google OAuth
+      window.location.href = authUrl
+    }
   }
 
   const syncToGoogleCalendar = async (accessToken: string) => {
@@ -74,7 +77,7 @@ export default function GoogleCalendarSync({ events }: GoogleCalendarSyncProps) 
       }
 
       const successCount = result.results?.filter((r: any) => r.success).length || 0
-      const failureCount = result.results?.length - successCount || 0
+      const failureCount = (result.results?.length || 0) - successCount
 
       setSyncStatus({
         success: successCount > 0,
@@ -92,24 +95,26 @@ export default function GoogleCalendarSync({ events }: GoogleCalendarSyncProps) 
   }
 
   // Check for auth code in URL (after OAuth redirect)
-  useState(() => {
-    const urlParams = new URLSearchParams(window.location.search)
-    const authCode = urlParams.get('code')
-    
-    if (authCode) {
-      // Exchange auth code for access token
-      // In a real implementation, you'd call your backend to exchange the code
-      // For demo purposes, we'll show a success message
-      setSyncStatus({
-        success: true,
-        message: 'Google Calendar authorization successful! Click sync to continue.'
-      })
-      setIsAuthorizing(false)
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const urlParams = new URLSearchParams(window.location.search)
+      const authCode = urlParams.get('code')
       
-      // Clean up URL
-      window.history.replaceState({}, document.title, window.location.pathname)
+      if (authCode) {
+        // Exchange auth code for access token
+        // In a real implementation, you'd call your backend to exchange the code
+        // For demo purposes, we'll show a success message
+        setSyncStatus({
+          success: true,
+          message: 'Google Calendar authorization successful! Click sync to continue.'
+        })
+        setIsAuthorizing(false)
+        
+        // Clean up URL
+        window.history.replaceState({}, document.title, window.location.pathname)
+      }
     }
-  })
+  }, [])
 
   if (events.length === 0) {
     return null

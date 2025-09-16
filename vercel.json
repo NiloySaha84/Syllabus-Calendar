@@ -1,15 +1,16 @@
 {
-    "functions": {
-      "src/app/api/parse/route.ts": {
-        "maxDuration": 30
-      },
-      "src/app/api/google-calendar/route.ts": {
-        "maxDuration": 20
-      }
+  "functions": {
+    "src/app/api/parse/route.ts": {
+      "maxDuration": 30
     },
-    "build": {
-      "env": {
-        "NEXT_PRIVATE_STANDALONE": "true"
-      }
+    "src/app/api/google-calendar/route.ts": {
+      "maxDuration": 20
     }
-  }
+  },
+  "build": {
+    "env": {
+      "NEXT_PRIVATE_STANDALONE": "true"
+    }
+  },
+  "installCommand": "npm install --legacy-peer-deps"
+}
