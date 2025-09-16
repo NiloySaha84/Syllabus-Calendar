@@ -53,7 +53,7 @@ export default function CalendarView({ events, onEventEdit }: CalendarViewProps)
         events={calendarEvents}
         startAccessor="start"
         endAccessor="end"
-        view={view}
+        defaultView={view}
         onView={setView}
         onSelectEvent={handleSelectEvent}
         eventPropGetter={eventStyleGetter}
