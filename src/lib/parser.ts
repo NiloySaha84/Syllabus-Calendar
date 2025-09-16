@@ -1,25 +1,21 @@
 import * as chrono from 'chrono-node'
 import { SyllabusEvent, ParseResult } from '@/types'
-import { v4 as uuidv4 } from 'crypto'
+import { v4 as uuidv4 } from 'uuid'
 import { format } from 'date-fns'
 
-/**
- * Parse syllabus text and extract events using hybrid approach:
- * 1. Extract dates using chrono-node
- * 2. Classify event types using OpenAI API
- */
+
 export async function parseSyllabusText(text: string): Promise<ParseResult> {
   try {
-    // Clean the text
+    
     const cleanText = text.replace(/\s+/g, ' ').trim()
     
-    // Split into lines for processing
+    
     const lines = cleanText.split('\n').map(line => line.trim()).filter(line => line.length > 0)
     
     const events: SyllabusEvent[] = []
     
     for (const line of lines) {
-      // Use chrono to find dates in each line
+      
       const dateMatches = chrono.parse(line, new Date())
       
       for (const match of dateMatches) {
@@ -41,7 +37,7 @@ export async function parseSyllabusText(text: string): Promise<ParseResult> {
       }
     }
     
-    // If OpenAI API is available, enhance classification
+    
     if (process.env.OPENAI_API_KEY && events.length > 0) {
       try {
         await enhanceEventsWithOpenAI(events, cleanText)
@@ -50,7 +46,7 @@ export async function parseSyllabusText(text: string): Promise<ParseResult> {
       }
     }
     
-    // Remove duplicates and sort by date
+    
     const uniqueEvents = removeDuplicates(events)
     uniqueEvents.sort((a, b) => a.date.getTime() - b.date.getTime())
     
@@ -68,23 +64,21 @@ export async function parseSyllabusText(text: string): Promise<ParseResult> {
   }
 }
 
-/**
- * Classify event type based on keywords
- */
+
+ 
 function classifyEventType(text: string): 'assignment' | 'exam' | 'reading' | 'other' {
   const lowerText = text.toLowerCase()
   
-  // Assignment keywords
+ 
   if (lowerText.match(/\b(assignment|homework|hw|project|paper|essay|report|submit|due)\b/)) {
     return 'assignment'
   }
   
-  // Exam keywords
+  
   if (lowerText.match(/\b(exam|test|quiz|midterm|final|assessment)\b/)) {
     return 'exam'
   }
   
-  // Reading keywords
   if (lowerText.match(/\b(reading|read|chapter|pages?|textbook|article|book)\b/)) {
     return 'reading'
   }
@@ -92,20 +86,12 @@ function classifyEventType(text: string): 'assignment' | 'exam' | 'reading' | 'o
   return 'other'
 }
 
-/**
- * Extract meaningful title from the line
- */
 function extractEventTitle(line: string, type: string): string {
-  // Remove common date patterns
   let title = line.replace(/\b(january|february|march|april|may|june|july|august|september|october|november|december)\s+\d{1,2}(,?\s+\d{4})?\b/gi, '')
   title = title.replace(/\b\d{1,2}\/\d{1,2}(\/\d{2,4})?\b/g, '')
   title = title.replace(/\b\d{1,2}-\d{1,2}-\d{2,4}\b/g, '')
-  
-  // Clean up
   title = title.replace(/[-–—:]+/g, '').trim()
   title = title.replace(/\s+/g, ' ')
-  
-  // If title is too short or generic, create a better one
   if (title.length < 5) {
     const typeMap = {
       assignment: 'Assignment',
@@ -115,14 +101,9 @@ function extractEventTitle(line: string, type: string): string {
     }
     title = typeMap[type as keyof typeof typeMap] || 'Event'
   }
-  
-  // Capitalize first letter
   return title.charAt(0).toUpperCase() + title.slice(1)
 }
 
-/**
- * Check if date is reasonable for academic calendar
- */
 function isValidAcademicDate(date: Date): boolean {
   const now = new Date()
   const oneYearFromNow = new Date(now.getFullYear() + 1, now.getMonth(), now.getDate())
@@ -131,16 +112,10 @@ function isValidAcademicDate(date: Date): boolean {
   return date >= sixMonthsAgo && date <= oneYearFromNow
 }
 
-/**
- * Generate unique ID using simple method
- */
 function generateId(): string {
   return Date.now().toString(36) + Math.random().toString(36).substr(2)
 }
 
-/**
- * Remove duplicate events based on date and similarity of title
- */
 function removeDuplicates(events: SyllabusEvent[]): SyllabusEvent[] {
   const unique: SyllabusEvent[] = []
   
@@ -159,9 +134,6 @@ function removeDuplicates(events: SyllabusEvent[]): SyllabusEvent[] {
   return unique
 }
 
-/**
- * Enhance events using OpenAI API for better classification
- */
 async function enhanceEventsWithOpenAI(events: SyllabusEvent[], fullText: string): Promise<void> {
   if (!process.env.OPENAI_API_KEY) return
   
@@ -203,7 +175,6 @@ Return only valid JSON array, no other text.
     try {
       const enhancedEvents = JSON.parse(content)
       
-      // Update existing events with enhanced data
       for (const enhanced of enhancedEvents) {
         const existingEvent = events.find(e => format(e.date, 'yyyy-MM-dd') === enhanced.date)
         if (existingEvent) {
