@@ -71,7 +71,7 @@ export default function EventEditor({ event, onSave, onDelete, onClose }: EventE
             </label>
             <select
               value={type}
-              onChange={(e) => setType(e.target.value)}
+              onChange={(e) => setType(e.target.value as 'assignment' | 'exam' | 'reading' | 'other')}
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
               <option value="assignment">Assignment</option>
