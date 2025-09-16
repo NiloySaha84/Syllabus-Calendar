@@ -239,5 +239,3 @@ I implemented a multi-layered approach:
 MIT License - Feel free to use this project for personal or educational purposes.
 
 ---
-
-Built with ❤️ using Next.js, TypeScript, and modern web technologies.
